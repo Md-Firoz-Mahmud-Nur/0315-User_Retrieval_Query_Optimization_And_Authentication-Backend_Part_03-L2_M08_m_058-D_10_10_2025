@@ -15,11 +15,12 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
-  const { limit, page } = req.query;
+  const { limit, page, search } = req.query;
 
   const result = await UserService.getAllFromDB({
     limit: Number(limit),
     page: Number(page),
+    search: String(search),
   });
 
   sendResponse(res, {
