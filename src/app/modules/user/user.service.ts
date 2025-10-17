@@ -28,8 +28,19 @@ const createPatient = async (req: Request) => {
   return result;
 };
 
-const getAllFromDB = async () => {
-  const result = await prisma.user.findMany();
+const getAllFromDB = async ({
+  limit,
+  page,
+}: {
+  limit: number;
+  page: number;
+}) => {
+  const skip = (page - 1) * limit;
+  const take = limit;
+  const result = await prisma.user.findMany({
+    skip,
+    take,
+  });
   return result;
 };
 
