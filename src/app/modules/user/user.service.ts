@@ -28,6 +28,12 @@ const createPatient = async (req: Request) => {
   return result;
 };
 
+const getAllFromDB = async () => {
+  const result = await prisma.user.findMany();
+  return result;
+};
+
 export const UserService = {
   createPatient,
+  getAllFromDB,
 };
