@@ -31,11 +31,15 @@ const createPatient = async (req: Request) => {
 const getAllFromDB = async ({
   limit,
   page,
-  search = "",
+  search,
+  sortBy,
+  sortOrder,
 }: {
   limit: number;
   page: number;
-  search: string;
+  search?: any;
+  sortBy?: any;
+  sortOrder?: any;
 }) => {
   const pageNumber = page || 1;
   const limitNumber = limit || 10;
@@ -53,6 +57,15 @@ const getAllFromDB = async ({
         mode: "insensitive",
       },
     },
+
+    orderBy:
+      sortBy && sortOrder
+        ? {
+            [sortBy]: sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
   });
   return result;
 };
