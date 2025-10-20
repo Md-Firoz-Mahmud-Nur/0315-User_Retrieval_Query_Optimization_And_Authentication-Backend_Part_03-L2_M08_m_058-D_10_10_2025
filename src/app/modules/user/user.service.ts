@@ -28,25 +28,9 @@ const createPatient = async (req: Request) => {
   return result;
 };
 
-const getAllFromDB = async ({
-  limit,
-  page,
-  search,
-  sortBy,
-  sortOrder,
-  role,
-  status,
-}: {
-  limit: number;
-  page: number;
-  search?: any;
-  sortBy?: any;
-  sortOrder?: any;
-  role?: any;
-  status?: any;
-}) => {
-  const pageNumber = page || 1;
-  const limitNumber = limit || 10;
+const getAllFromDB = async (params: any,options: any) => {
+  const pageNumber = options.page || 1;
+  const limitNumber = options.limit || 10;
 
   const skip = (pageNumber - 1) * limitNumber;
   const take = limitNumber;

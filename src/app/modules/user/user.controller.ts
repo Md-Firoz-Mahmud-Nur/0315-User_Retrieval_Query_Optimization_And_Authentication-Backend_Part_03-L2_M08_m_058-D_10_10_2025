@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import pick from "../../helper/pick";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { UserService } from "./user.service";
@@ -15,17 +16,11 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
-  const { limit, page, search, sortBy, sortOrder, role, status } = req.query;
+  const filters = pick(req.query, ["email", "role", "status"]);
 
-  const result = await UserService.getAllFromDB({
-    limit: Number(limit),
-    page: Number(page),
-    search,
-    sortBy,
-    sortOrder,
-    role,
-    status,
-  });
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+  const result = await UserService.getAllFromDB(filters, options);
 
   sendResponse(res, {
     statusCode: 200,
