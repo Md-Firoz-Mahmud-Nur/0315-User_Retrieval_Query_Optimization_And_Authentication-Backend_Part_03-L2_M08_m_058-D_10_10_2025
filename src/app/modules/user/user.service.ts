@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Request } from "express";
 import { fileUploader } from "../../helper/fileUploader";
+import { IOptions, paginationHelper } from "../../helper/paginationHelper";
 import { prisma } from "../../shared/prisma";
 
 const createPatient = async (req: Request) => {
@@ -28,16 +29,13 @@ const createPatient = async (req: Request) => {
   return result;
 };
 
-const getAllFromDB = async (params: any,options: any) => {
-  const pageNumber = options.page || 1;
-  const limitNumber = options.limit || 10;
-
-  const skip = (pageNumber - 1) * limitNumber;
-  const take = limitNumber;
+const getAllFromDB = async (params: any, options: IOptions) => {
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(options);
 
   const result = await prisma.user.findMany({
     skip,
-    take,
+    take: limit,
 
     where: {
       email: {
@@ -48,14 +46,9 @@ const getAllFromDB = async (params: any,options: any) => {
       status: status,
     },
 
-    orderBy:
-      sortBy && sortOrder
-        ? {
-            [sortBy]: sortOrder,
-          }
-        : {
-            createdAt: "desc",
-          },
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
   });
   return result;
 };
