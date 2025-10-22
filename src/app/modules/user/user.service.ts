@@ -1,8 +1,10 @@
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { Request } from "express";
 import { fileUploader } from "../../helper/fileUploader";
 import { IOptions, paginationHelper } from "../../helper/paginationHelper";
 import { prisma } from "../../shared/prisma";
+import { userSearchableFields } from "./user.constant";
 
 const createPatient = async (req: Request) => {
   if (req.file) {
@@ -33,23 +35,40 @@ const getAllFromDB = async (params: any, options: IOptions) => {
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(options);
 
+  const { search, ...filterData } = params;
+
+  const andConditions: Prisma.UserWhereInput[] = [];
+
+  if (search) {
+    andConditions.push({
+      OR: userSearchableFields.map((field) => ({
+        [field]: { contains: search, mode: "insensitive" },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData.length > 0)) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => ({
+        [key]: {
+          equals: filterData[key],
+        },
+      })),
+    });
+  }
+
   const result = await prisma.user.findMany({
     skip,
     take: limit,
 
     where: {
-      email: {
-        contains: search,
-        mode: "insensitive",
-      },
-      role: role,
-      status: status,
+      AND: andConditions,
     },
-
     orderBy: {
       [sortBy]: sortOrder,
     },
   });
+
   return result;
 };
 
