@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import pick from "../../helper/pick";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
+import { userFilterableFields } from "./user.constant";
 import { UserService } from "./user.service";
 
 const createPatient = catchAsync(async (req: Request, res: Response) => {
@@ -16,7 +17,7 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
-  const filters = pick(req.query, ["email", "role", "status"]);
+  const filters = pick(req.query, userFilterableFields);
 
   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
 
@@ -26,7 +27,8 @@ const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     message: "User retrieved successfully!",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 
