@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Admin, Prisma, UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { Request } from "express";
 import { fileUploader } from "../../helper/fileUploader";
@@ -26,6 +26,37 @@ const createPatient = async (req: Request) => {
     return await tnx.patient.create({
       data: req.body.patient,
     });
+  });
+
+  return result;
+};
+
+const createAdmin = async (req: Request): Promise<Admin> => {
+  const file = req.file;
+
+  if (file) {
+    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+    req.body.admin.profilePhoto = uploadToCloudinary?.secure_url;
+  }
+
+  const hashedPassword: string = await bcrypt.hash(req.body.password, 10);
+
+  const userData = {
+    email: req.body.admin.email,
+    password: hashedPassword,
+    role: UserRole.ADMIN,
+  };
+
+  const result = await prisma.$transaction(async (transactionClient) => {
+    await transactionClient.user.create({
+      data: userData,
+    });
+
+    const createdAdminData = await transactionClient.admin.create({
+      data: req.body.admin,
+    });
+
+    return createdAdminData;
   });
 
   return result;
@@ -87,5 +118,6 @@ const getAllFromDB = async (params: any, options: IOptions) => {
 
 export const UserService = {
   createPatient,
+  createAdmin,
   getAllFromDB,
 };
